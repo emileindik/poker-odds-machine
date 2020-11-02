@@ -17,7 +17,6 @@ console.timeEnd();
 printError(s);
 
 function printError(stats: any) {
-    console.log(stats['NPC 1'].handStats)
     const probs = {
         'straightFlush': .031083,
         'quads': .168067,
@@ -35,10 +34,10 @@ function printError(stats: any) {
     for (const e in stats['NPC 1'].handStats) {
         const diff = stats['NPC 1'].handStats[e].percent - probs[e];
         output.push({
-            'name': e,
-            '% occur': probs[e],
-            '% error': +(diff/probs[e] * 100).toFixed(4),
-            'abs error': +diff.toFixed(4)
+            'hand': e,
+            '% hypo': probs[e],
+            '% estimated': stats['NPC 1'].handStats[e].percent,
+            '% error': +(diff/probs[e] * 100).toFixed(4)
         });
     }
 
