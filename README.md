@@ -10,7 +10,7 @@ npm install poker-odds-machine
 ## Usage
 
 ```ts
-const Calculator = require('poker-odds-machineCalculator;
+const Calculator = require('poker-odds-machine').Calculator;
 const input = {
     /**
      * Hands of players, following the syntax below.
