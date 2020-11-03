@@ -66,7 +66,7 @@ const s = c.simulate();
 console.log(s);
 ```
 
-<details><summary>Sample output</summary>
+<details><summary>Super verbose sample output</summary>
 
 ```
 {
