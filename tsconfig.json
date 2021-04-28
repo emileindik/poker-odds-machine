@@ -3,6 +3,7 @@
     "module": "commonjs",
     "target": "ESNext",
     "outDir": "dist",
-    "noEmitOnError": true
+    "noEmitOnError": true,
+    "sourceMap": true
   }
 }

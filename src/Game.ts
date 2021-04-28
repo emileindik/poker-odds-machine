@@ -30,6 +30,7 @@ class Player {
             }
             return 0;
         }
+
         return p.bestHand.handRank > this.bestHand.handRank ? 1 : -1;
     }
 }
@@ -95,7 +96,6 @@ class Game {
 
     private dealKnownCards() {
         for (const s of this.input.hands) {
-
             const dealtCards = new CardGroup(s);
             dealtCards.cards.forEach(c => this.deck.removeCard(c));
 
@@ -113,7 +113,6 @@ class Game {
         }
 
         for (let i = 0; i < this.input.numPlayers - this.input.hands.length; i++) {
-
             const dealtCards = new CardGroup();
             for (let j = 0; j < this.input.handSize; j++) {
                 dealtCards.addCards(this.deck.pop());

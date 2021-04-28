@@ -68,7 +68,7 @@ export function validateInput(input: Input): void {
     // hands
     if ('hands' in input) {
         if (!Array.isArray(input.hands))
-            throw new Error(`"hands" must be an array of strings like ["5cTh"]. Invalid: ${input.hands}`);
+            throw new Error(`"hands" must be an array of strings like ["5c,Th"]. Invalid: ${input.hands}`);
     
         for (const hand of input.hands) {
             const cardGroup = new CardGroup(hand);
@@ -83,14 +83,15 @@ export function validateInput(input: Input): void {
     }
 
     // hands + board must be unique
-    let allCards = '';
+    const allCards = [];
     if (input.hands)
-        input.hands.forEach(e => allCards += e);
-    allCards += input.board;
+        input.hands.forEach(e => allCards.push(...e.split(',')));
 
-    const allCardsArray: string[] = allCards.match(/.{1,3}/g);
-    if ((new Set(allCardsArray)).size !== allCardsArray.length)
-        throw new Error(`Input cards must be unique. Invalid: ${allCardsArray}`);
+    if (input.board)
+        allCards.push(...input.board.split(','));
+
+    if ((new Set(allCards)).size !== allCards.length)
+        throw new Error(`Input cards must be unique. Invalid: ${allCards}`);
 }
 
 export function cleanInput(input: Input): void {
