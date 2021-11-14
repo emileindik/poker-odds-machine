@@ -4,7 +4,8 @@
         "target": "ESNext",
         "outDir": "dist",
         "noEmitOnError": true,
-        "sourceMap": true
+        "sourceMap": true,
+        "strict": true
     },
     "exclude": ["**/*.test.*"]
 }

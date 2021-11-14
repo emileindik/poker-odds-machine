@@ -35,31 +35,110 @@ export enum HandRanks {
     straightFlush,
 }
 
-export type Input = {
-    numPlayers?: number;
-    numDecks?: number;
-    hands?: string[];
-    handSize?: number;
+export interface InternalInput {
+    hands: string[];
+    numPlayers: number;
+    board: string;
+    boardSize: number;
+    handSize: number;
+    numDecks: number;
+    returnHandStats: boolean;
+    returnTieHandStats: boolean;
+    iterations: number;
+}
+
+export type Input =
+    | ExternalInputWithEverythingProvided
+    | ExternalInputWithHands
+    | ExternalInputWithNumberOfPlayers;
+
+export const isInputAnEternalInputWithEverythingProvided = (
+    input: Input
+): input is ExternalInputWithEverythingProvided =>
+    isInputAnExternalInputWithHands(input) &&
+    isInputAnExternalInputWithNumberOfPlayers(input);
+interface ExternalInputWithEverythingProvided extends BaseExternalInput {
+    hands: string[];
+}
+
+export const isInputAnExternalInputWithHands = (
+    input: Input
+): input is ExternalInputWithHands => 'hands' in input;
+interface ExternalInputWithHands extends BaseExternalInput {
+    hands: string[];
+}
+
+export const isInputAnExternalInputWithNumberOfPlayers = (
+    input: Input
+): input is ExternalInputWithNumberOfPlayers => {
+    return 'numPlayers' in input;
+};
+interface ExternalInputWithNumberOfPlayers extends BaseExternalInput {
+    numPlayers: number;
+}
+
+interface BaseExternalInput {
     board?: string;
     boardSize?: number;
-    iterations?: number;
+    handSize?: number;
+    numDecks?: number;
     returnHandStats?: boolean;
     returnTieHandStats?: boolean;
-};
+    iterations?: number;
+}
 
 export type BestHand = {
     hand: CardGroup;
     handRank: HandRanks;
 };
 
-export type Stats = {
-    winCount: number;
-    winPercent: number;
-    tieCount: number;
-    tiePercent: number;
-    tieHandStats: HandStats;
-    handStats: HandStats;
+export const isStatsWithBothHandAndTieHandStats = (
+    stats: Stats
+): stats is StatsWithBothHandAndTieHandStats =>
+    isStatsWithHandStats(stats) && isStatsWithTieHandStats(stats);
+type StatsWithBothHandAndTieHandStats = StatsWithHandStats &
+    StatsWithTieHandStats;
+
+export const isStatsWithHandStats = (
+    stats: Stats
+): stats is StatsWithHandStats => 'handStats' in stats;
+export const makeStatsHandStatsIfItIsNotAlready = (
+    stats: Stats
+): StatsWithHandStats => {
+    if (isStatsWithHandStats(stats)) return stats;
+    (stats as StatsWithHandStats).handStats = {};
+    return stats as StatsWithHandStats;
 };
+interface StatsWithHandStats extends BaseStats {
+    handStats: HandStats;
+}
+
+export const isStatsWithTieHandStats = (
+    stats: Stats
+): stats is StatsWithTieHandStats => 'tieHandStats' in stats;
+export const makeStatsTieHandStatsIfItIsNotAlready = (
+    stats: Stats
+): StatsWithTieHandStats => {
+    if (isStatsWithTieHandStats(stats)) return stats;
+    (stats as StatsWithTieHandStats).tieHandStats = {};
+    return stats as StatsWithTieHandStats;
+};
+interface StatsWithTieHandStats extends BaseStats {
+    tieHandStats: HandStats;
+}
+
+export type Stats =
+    | BaseStats
+    | StatsWithHandStats
+    | StatsWithTieHandStats
+    | StatsWithBothHandAndTieHandStats;
+
+interface BaseStats {
+    winCount: number;
+    tieCount: number;
+    winPercent?: number;
+    tiePercent?: number;
+}
 
 type HandStats = Record<
     string,
@@ -280,11 +359,12 @@ export class Deck extends CardGroup {
     }
 
     pop(): Card {
-        if (this._cards.length === 0)
+        const card = this._cards.pop();
+        if (card === undefined)
             throw new Error(
                 'Deck is empty. There are either too many players, or the boardSize is too large'
             );
-        return this._cards.pop();
+        return card;
     }
 
     removeCard(cardToRemove: Card): Card {
