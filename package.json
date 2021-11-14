@@ -1,6 +1,6 @@
 {
   "name": "@alexjamesmalcolm/poker-odds-machine",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Poker odds machine (calculator)",
   "main": "dist/index.js",
   "types": "index.ts",
