@@ -1,9 +1,9 @@
 {
-  "compilerOptions": {
-    "module": "commonjs",
-    "target": "ESNext",
-    "outDir": "dist",
-    "noEmitOnError": true,
-    "sourceMap": true
-  }
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "ESNext",
+        "outDir": "dist",
+        "noEmitOnError": true,
+        "sourceMap": true
+    }
 }

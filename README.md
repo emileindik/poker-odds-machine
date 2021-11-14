@@ -1,6 +1,7 @@
 # poker-odds-machine
+
 > Uses Monte Carlo simulation to estimate win probability of any poker hand.  
-Check it out in action at https://emileindik.com/projects/poker.html (Heroku will probably be sleepy and need to wake up, so give it a minute)
+> Check it out in action at https://emileindik.com/projects/poker.html (Heroku will probably be sleepy and need to wake up, so give it a minute)
 
 ## Install
 
@@ -17,7 +18,7 @@ const input = {
      * Hands of players, following the syntax below.
      * A player can have a partial hand (one card specified) in order
      * to have their next card randomly selected.
-     * If hands option not supplied, then numPlayers must be provided. 
+     * If hands option not supplied, then numPlayers must be provided.
      */
     hands: ['Ac,Kc', '2h,7d', 'Js'],
     /**
@@ -59,7 +60,7 @@ const input = {
      * but the longer the calculation takes.
      * Defaults to 1000.
      */
-    iterations: 1000000
+    iterations: 1000000,
 };
 
 const c = new Calculator(input);
@@ -185,6 +186,7 @@ console.log(s);
   }
 }
 ```
+
 </details>
 
 Disclaimer:  
@@ -210,4 +212,5 @@ npm test
 │    8    │ 'straightFlush' │ 0.031083  │   0.0308    │ -0.9105 │
 └─────────┴─────────────────┴───────────┴─────────────┴─────────┘
 ```
+
 The test calculates estimated probability for all hands and compares them against their true hypothetical value (% hypo).
