@@ -55,7 +55,7 @@ const input = {
      */
     returnTieHandStats: true,
     /**
-     * Number of iterations in the Monte Carlo simluation to perform.
+     * Number of iterations in the Monte Carlo simulation to perform.
      * The more iterations, the more accurate the returned probabilities,
      * but the longer the calculation takes.
      * Defaults to 1000.
