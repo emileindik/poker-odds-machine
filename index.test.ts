@@ -2,7 +2,7 @@ import { describe, it, expect } from '@jest/globals';
 import { Calculator, Input } from '.';
 
 describe('Calculator', () => {
-    it('should show player 1 beating player 2 by a lot', () => {
+    it('should show player 1 beating player 2 by at least 70%', () => {
         const firstHand = 'Ac,Ad';
         const secondHand = '7c,2d';
         const input: Input = {
