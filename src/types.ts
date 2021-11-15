@@ -1,4 +1,4 @@
-import { shuffle } from "./util";
+import { shuffle } from './util';
 
 export enum Suits {
     club = 1,
@@ -35,40 +35,120 @@ export enum HandRanks {
     straightFlush,
 }
 
-export type Input = {
-    numPlayers?: number;
-    numDecks?: number;
-    hands?: string[];
-    handSize?: number;
+export interface InternalInput {
+    hands: string[];
+    numPlayers: number;
+    board: string;
+    boardSize: number;
+    handSize: number;
+    numDecks: number;
+    returnHandStats: boolean;
+    returnTieHandStats: boolean;
+    iterations: number;
+}
+
+export type Input =
+    | ExternalInputWithEverythingProvided
+    | ExternalInputWithHands
+    | ExternalInputWithNumberOfPlayers;
+
+export const isInputAnEternalInputWithEverythingProvided = (
+    input: Input
+): input is ExternalInputWithEverythingProvided =>
+    isInputAnExternalInputWithHands(input) &&
+    isInputAnExternalInputWithNumberOfPlayers(input);
+interface ExternalInputWithEverythingProvided extends BaseExternalInput {
+    hands: string[];
+}
+
+export const isInputAnExternalInputWithHands = (
+    input: Input
+): input is ExternalInputWithHands => 'hands' in input;
+interface ExternalInputWithHands extends BaseExternalInput {
+    hands: string[];
+}
+
+export const isInputAnExternalInputWithNumberOfPlayers = (
+    input: Input
+): input is ExternalInputWithNumberOfPlayers => {
+    return 'numPlayers' in input;
+};
+interface ExternalInputWithNumberOfPlayers extends BaseExternalInput {
+    numPlayers: number;
+}
+
+interface BaseExternalInput {
     board?: string;
     boardSize?: number;
-    iterations?: number;
+    handSize?: number;
+    numDecks?: number;
     returnHandStats?: boolean;
     returnTieHandStats?: boolean;
+    iterations?: number;
 }
 
 export type BestHand = {
     hand: CardGroup;
     handRank: HandRanks;
-}
+};
 
+export const isStatsWithBothHandAndTieHandStats = (
+    stats: Stats
+): stats is StatsWithBothHandAndTieHandStats =>
+    isStatsWithHandStats(stats) && isStatsWithTieHandStats(stats);
+type StatsWithBothHandAndTieHandStats = StatsWithHandStats &
+    StatsWithTieHandStats;
 
-export type Stats = {
-    winCount: number;
-    winPercent: number;
-    tieCount: number;
-    tiePercent: number;
-    tieHandStats: HandStats;
+export const isStatsWithHandStats = (
+    stats: Stats
+): stats is StatsWithHandStats => 'handStats' in stats;
+export const makeStatsHandStatsIfItIsNotAlready = (
+    stats: Stats
+): StatsWithHandStats => {
+    if (isStatsWithHandStats(stats)) return stats;
+    (stats as StatsWithHandStats).handStats = {};
+    return stats as StatsWithHandStats;
+};
+interface StatsWithHandStats extends BaseStats {
     handStats: HandStats;
 }
 
-type HandStats = Record<string, {
-    count: number;
-    percent: number;
-}>;
+export const isStatsWithTieHandStats = (
+    stats: Stats
+): stats is StatsWithTieHandStats => 'tieHandStats' in stats;
+export const makeStatsTieHandStatsIfItIsNotAlready = (
+    stats: Stats
+): StatsWithTieHandStats => {
+    if (isStatsWithTieHandStats(stats)) return stats;
+    (stats as StatsWithTieHandStats).tieHandStats = {};
+    return stats as StatsWithTieHandStats;
+};
+interface StatsWithTieHandStats extends BaseStats {
+    tieHandStats: HandStats;
+}
+
+export type Stats =
+    | BaseStats
+    | StatsWithHandStats
+    | StatsWithTieHandStats
+    | StatsWithBothHandAndTieHandStats;
+
+interface BaseStats {
+    winCount: number;
+    tieCount: number;
+    winPercent?: number;
+    tiePercent?: number;
+}
+
+type HandStats = Record<
+    string,
+    {
+        count: number;
+        percent: number;
+    }
+>;
 
 class Suit {
-
     static fromString(s: string): Suits {
         switch (s) {
             case 'c':
@@ -85,26 +165,22 @@ class Suit {
     }
 
     static toString(suit: Suits): string {
-        if (!(suit in Suits))
-            throw new Error(`Invalid suit value: ${suit}`);
+        if (!(suit in Suits)) throw new Error(`Invalid suit value: ${suit}`);
 
         return Suits[suit][0];
     }
 
     static toLongName(suit: Suits, plural?: boolean): string {
-        if (!(suit in Suits))
-            throw new Error(`Invalid suit value: ${suit}`);
+        if (!(suit in Suits)) throw new Error(`Invalid suit value: ${suit}`);
 
         let longName = Suits[suit];
-        if (plural)
-            longName += 's';
+        if (plural) longName += 's';
 
         return longName;
     }
 }
 
 class Rank {
-
     static fromString(s: string): Ranks {
         switch (s) {
             case 'T':
@@ -122,7 +198,7 @@ class Rank {
 
                 if (isNaN(n) || n < Ranks.two || n > Ranks.nine)
                     throw new Error(`Invalid card rank string: ${s}`);
-                
+
                 return n;
         }
     }
@@ -148,8 +224,7 @@ class Rank {
     }
 
     static toLongName(rank: Ranks): string {
-        if (!(rank in Ranks))
-            throw new Error(`Invalid rank value: ${rank}`);
+        if (!(rank in Ranks)) throw new Error(`Invalid rank value: ${rank}`);
 
         return Ranks[rank];
     }
@@ -175,11 +250,20 @@ export class Card {
 
     static validateCardString(s: string) {
         if (s.length !== 2)
-            throw new Error(`Card string must have a length of 2. Invalid: ${s}`);
-        if (!['T', 'J', 'Q', 'K', 'A'].includes(s[0]) && (+s[0] < 2 || +s[0] > 9))
-            throw new Error(`Card string must begin with 2-9, T, J, Q, K, or A. Invalid: ${s}`);
+            throw new Error(
+                `Card string must have a length of 2. Invalid: ${s}`
+            );
+        if (
+            !['T', 'J', 'Q', 'K', 'A'].includes(s[0]) &&
+            (+s[0] < 2 || +s[0] > 9)
+        )
+            throw new Error(
+                `Card string must begin with 2-9, T, J, Q, K, or A. Invalid: ${s}`
+            );
         if (!['c', 'd', 'h', 's'].includes(s[1]))
-            throw new Error(`Card string must end with c, d, h, or s. Invalid: ${s}`);
+            throw new Error(
+                `Card string must end with c, d, h, or s. Invalid: ${s}`
+            );
     }
 
     equals(card: Card): boolean {
@@ -192,31 +276,30 @@ export class Card {
     }
 
     toLongName(): string {
-        return `${Rank.toLongName(this._rank)} of ${Suit.toLongName(this._suit, true)}`;
+        return `${Rank.toLongName(this._rank)} of ${Suit.toLongName(
+            this._suit,
+            true
+        )}`;
     }
 }
 
 export class CardGroup {
     protected _cards: Card[] = [];
-    
+
     get cards(): Card[] {
         return this._cards;
     }
-    
-    constructor(cards?: string)
-    constructor(cards?: Card[])
-    constructor(cards?: Card)
+
+    constructor(cards?: string);
+    constructor(cards?: Card[]);
+    constructor(cards?: Card);
     constructor(cards?: string | Card | Card[]) {
-        if (!cards)
-            return;
+        if (!cards) return;
 
         // todo: why are these conditions necessary to call function?
-        if (Array.isArray(cards))
-            this.addCards(cards);
-        else if (typeof cards === "string")
-            this.addCards(cards);
-        else
-            this.addCards(cards);
+        if (Array.isArray(cards)) this.addCards(cards);
+        else if (typeof cards === 'string') this.addCards(cards);
+        else this.addCards(cards);
     }
 
     static validateCardGroupString(s: string) {
@@ -226,7 +309,7 @@ export class CardGroup {
     }
 
     toString(): string {
-        return this._cards.map(c => c.toString()).join(',');
+        return this._cards.map((c) => c.toString()).join(',');
     }
 
     addCardGroup(cardGroup: CardGroup): void {
@@ -237,14 +320,10 @@ export class CardGroup {
     addCards(card: Card): void;
     addCards(card: Card[]): void;
     addCards(cards: string | Card | Card[]): void {
-        if (typeof cards === 'string')
-            this.addCardsString(cards);
-        else if (Array.isArray(cards))
-            this._cards.push(...cards);
-        else
-            this._cards.push(cards);
+        if (typeof cards === 'string') this.addCardsString(cards);
+        else if (Array.isArray(cards)) this._cards.push(...cards);
+        else this._cards.push(cards);
     }
-
 
     sortDesc(): void {
         this._cards.sort((a, b) => b.suit - a.suit);
@@ -256,10 +335,8 @@ export class CardGroup {
 
         for (const card of this._cards) {
             const prop = type === 'rank' ? card.rank : card.suit;
-            if (!(prop in map))
-                map[prop] = 1;
-            else
-                map[prop]++;
+            if (!(prop in map)) map[prop] = 1;
+            else map[prop]++;
         }
 
         return map;
@@ -271,21 +348,23 @@ export class CardGroup {
             this.addCards(card);
         }
     }
-
 }
 
 export class Deck extends CardGroup {
-
     constructor(numDecks: number) {
-        const deckString = '2c,2d,2h,2s,3c,3d,3h,3s,4c,4d,4h,4s,5c,5d,5h,5s,6c,6d,6h,6s,7c,7d,7h,7s,8c,8d,8h,8s,9c,9d,9h,9s,Tc,Td,Th,Ts,Jc,Jd,Jh,Js,Qc,Qd,Qh,Qs,Kc,Kd,Kh,Ks,Ac,Ad,Ah,As';
+        const deckString =
+            '2c,2d,2h,2s,3c,3d,3h,3s,4c,4d,4h,4s,5c,5d,5h,5s,6c,6d,6h,6s,7c,7d,7h,7s,8c,8d,8h,8s,9c,9d,9h,9s,Tc,Td,Th,Ts,Jc,Jd,Jh,Js,Qc,Qd,Qh,Qs,Kc,Kd,Kh,Ks,Ac,Ad,Ah,As';
         const decksString = Array(numDecks).fill(deckString);
         super(decksString.join(','));
     }
 
     pop(): Card {
-        if (this._cards.length === 0)
-            throw new Error('Deck is empty. There are either too many players, or the boardSize is too large');
-        return this._cards.pop();
+        const card = this._cards.pop();
+        if (card === undefined)
+            throw new Error(
+                'Deck is empty. There are either too many players, or the boardSize is too large'
+            );
+        return card;
     }
 
     removeCard(cardToRemove: Card): Card {
@@ -298,7 +377,9 @@ export class Deck extends CardGroup {
         }
 
         if (!found)
-            throw new Error(`CardGroup does not contain card string: ${cardToRemove.toString()}`);
+            throw new Error(
+                `CardGroup does not contain card string: ${cardToRemove.toString()}`
+            );
 
         return cardToRemove;
     }

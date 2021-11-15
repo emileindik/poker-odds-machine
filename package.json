@@ -1,11 +1,11 @@
 {
   "name": "poker-odds-machine",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Poker odds machine (calculator)",
   "main": "dist/index.js",
   "types": "index.ts",
   "scripts": {
-    "test": "node dist/test/index.js",
+    "test": "jest",
     "build": "rm -rf dist && tsc",
     "watch": "tsc -w",
     "prepublishOnly": "npm run build"
@@ -20,6 +20,16 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^14.0.22",
+    "jest": "^27.3.1",
+    "ts-jest": "^27.0.7",
+    "ts-node": "^10.4.0",
     "typescript": "^3.9.5"
-  }
+  },
+  "files": [
+    "LICENSE",
+    "README.md",
+    "dist",
+    "index.ts",
+    "src"
+  ]
 }
