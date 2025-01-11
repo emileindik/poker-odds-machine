@@ -1,6 +1,5 @@
 # poker-odds-machine
 > Uses Monte Carlo simulation to estimate win probability of any poker hand.  
-Check it out in action at https://emileindik.com/projects/poker.html (Heroku will probably be sleepy and need to wake up, so give it a minute)
 
 ## Install
 
